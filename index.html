@@ -1,25 +1,77 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="da">
 <head>
-  <title>Discoverthreejs.com - Your First Scene</title>
-
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta charset="UTF-8" />
+  <title>Three.js på GitHub Pages</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; background: #14161c; }
+    canvas { display: block; }
+  </style>
 
-  <link rel="icon" href="https://discoverthreejs.com/favicon.ico" type="image/x-icon">
-
-  <link href="./main.css" rel="stylesheet" type="text/css">
-
-  <script type="module" src="./main.js"></script>
+  <!-- Importmap: henter three.js direkte fra en CDN, så der ikke skal bygges noget -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
 </head>
-
 <body>
-  <h1>Discoverthreejs.com - Your First Scene</h1>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-  <div id="scene-container">
-    <!-- Our <canvas> will be inserted here -->
-  </div>
+    // Scene, kamera og renderer
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x14161c);
+
+    const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 100);
+    camera.position.set(2.5, 2, 4);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+    renderer.setSize(innerWidth, innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Lys
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    const sun = new THREE.DirectionalLight(0xffffff, 2);
+    sun.position.set(3, 4, 2);
+    scene.add(sun);
+
+    // Terning
+    const cube = new THREE.Mesh(
+      new THREE.BoxGeometry(1.5, 1.5, 1.5),
+      new THREE.MeshStandardMaterial({ color: 0xe8a33d, roughness: 0.4 })
+    );
+    scene.add(cube);
+
+    // Gitter som "gulv"
+    const grid = new THREE.GridHelper(10, 20, 0x555a66, 0x2c303a);
+    grid.position.y = -1.2;
+    scene.add(grid);
+
+    // Mus/touch-styring (træk for at rotere, scroll for at zoome)
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+
+    // Tilpas ved vinduesændring
+    addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+
+    // Animationsløkke
+    renderer.setAnimationLoop(() => {
+      cube.rotation.x += 0.005;
+      cube.rotation.y += 0.01;
+      controls.update();
+      renderer.render(scene, camera);
+    });
+  </script>
 </body>
-
 </html>
